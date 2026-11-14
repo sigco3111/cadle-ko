@@ -5,10 +5,10 @@ repo_size=319M docs_size=37M
 --- play html scripts ---
 <script>
 <script>
-<script type="module" crossorigin src="/cadle-ko/assets/play-DADy6coJ.js">
+<script type="module" crossorigin src="/cadle-ko/assets/play-Dw3u73Ku.js">
 <script>
 --- overlay in bundle ---
-docs/assets/overlay-CXQJJ3Ux.js
+docs/assets/overlay-CStuWkC2.js
 --- leftover root-absolute asset refs in docs ---
 0
 --- external hosts in built ---
@@ -16,22 +16,3 @@ docs/assets/overlay-CXQJJ3Ux.js
       2 https://cadle.gg
       2 http://www.w3.org
       1 https://jcgt.org
-rc=0
---- tail ---
-[i18n]
-dict 1120
-[npm install]
-
-added 45 packages in 4s
-[build]
-build_rc=0
-[main ab8fc4b] 게임: 한국어 오버레이 적용·빌드
- 8 files changed, 13 insertions(+), 171 deletions(-)
- rename docs/assets/{landing-BgqrVL1D.js => landing-CmBjFbVq.js} (99%)
- create mode 100644 docs/assets/overlay-CXQJJ3Ux.js
- delete mode 100644 docs/assets/overlay-yAzZAapG.js
- rename docs/assets/{play-BSfLbY2z.js => play-DADy6coJ.js} (82%)
-To https://github.com/sigco3111/cadle-ko
-   c2562c0..ab8fc4b  HEAD -> main
-DONE4
-[docs]

@@ -2,6 +2,8 @@
 import ko from './ko.json';
 
 const DICT = ko.s || {};
+const NORM = {};
+for (const k in DICT) { const nk = k.replace(/\s+/g, ' ').trim(); if (!(nk in NORM)) NORM[nk] = DICT[k]; }
 const RULES = (ko.r || []).map(([re, to]) => [new RegExp(re, 'i'), to]);
 const KEY = 'cadle-ko-lang';
 let lang = 'ko';
@@ -15,6 +17,8 @@ const ATTRS = ['placeholder', 'title', 'aria-label', 'alt'];
 function core(str) {
   const hit = DICT[str];
   if (hit) return hit;
+  const nk = str.replace(/\s+/g, ' ').trim();
+  if (NORM[nk]) return NORM[nk];
   for (let i = 0; i < RULES.length; i++) if (RULES[i][0].test(str)) return str.replace(RULES[i][0], RULES[i][1]);
   return null;
 }
