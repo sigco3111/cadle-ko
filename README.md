@@ -1,158 +1,57 @@
-# Cadle
+# 캐들 한국어판 (Cadle-ko)
 
-**A Destiny-grade FPS-RPG that runs in a browser tab.** Ten regions, sixty-five quests, twenty-five
-creatures, no download and no account. Everything you hear is synthesised in code.
+**비공식 한국어판 — 브라우저에서 바로 켜지는 Destiny 풍 FPS-RPG 「Cadle」의 한국어판입니다.**
 
-### ▶ [Play it now — cadle.gg](https://cadle.gg/play/?start)
+### ▶ [플레이하기](https://sigco3111.github.io/cadle-ko/play/)
 
-![The Vale](public/assets/site/vale-b.jpg)
+- 원작: **Humpalumps/Cadle** — <https://github.com/Humpalumps/Cadle> (제작: Ian Cadle, 코드 MIT)
+- 원작 데모: <https://cadle.gg/play/>
+- 한글화 기준 원작 커밋: ea0da62549980816a6a27e08b75808b1f56d70e7
 
-[![checks](https://github.com/Humpalumps/Cadle/actions/workflows/checks.yml/badge.svg)](https://github.com/Humpalumps/Cadle/actions/workflows/checks.yml)
-[![licence: MIT](https://img.shields.io/badge/licence-MIT-d3a548)](LICENSE)
-[![three.js r185](https://img.shields.io/badge/three.js-r185-049EF4)](https://threejs.org)
+## 무엇을 했나
 
-Cadle aims at one target: **Destiny 2's moment-to-moment feel** with **Final Fantasy XIV's light**.
-90–105° FOV, sprint-slide-double-jump with real momentum, per-archetype recoil and ADS snap, hit
-markers and damage numbers — over a 2 km² world of ten biomes you walk between, each with its own
-ground, silhouette, bestiary, weather of light and score. It runs at 124 fps on a desktop GPU.
+- 화면에 나오는 영어 문구를 한국어로: 퀘스트 65개(제목·목표·의뢰 대사·진행·완료), 아이템·크리처·지역 이름, 아이템 설명과 툴팁, 메뉴·버튼·설정·조작 화면
+- 오른쪽 아래 **English / 한국어** 버튼으로 원문(영어)으로 즉시 전환 (선택은 브라우저에 기억됩니다)
+- 한글 글꼴: 시스템 한글 글꼴 우선(Apple SD Gothic Neo, 맑은 고딕, Noto Sans KR 순), 한국어 줄바꿈(word-break: keep-all) 적용
+- 하단에 원작 표기(원작 저장소 링크)를 게임 화면 안에 둠
+- 용어 표: [docs/glossary.md](docs/glossary.md)
 
----
+## 플레이 방법
 
-## Walk into any region right now
+- WASD로 이동, 마우스로 조준·사격, Shift로 질주. 슬라이드와 더블 점프로 관성을 이어가며 이동합니다.
+- 정확한 키 목록은 게임 안 **조작**(Controls) 화면에서 확인하세요.
+- 10개 지역, 65개 퀘스트, 25종의 크리처. 레벨 1–50.
 
-No install, no account. Each link drops you at that region's landmark, facing it, with the music and
-the light already correct — `?at=<id>` is a supported parameter, not a debug hack.
+## 기술
 
-| | |
-|---|---|
-| [![The Vale](public/assets/site/vale-c.jpg)](https://cadle.gg/play/?start&at=vale)<br>**[The Vale](https://cadle.gg/play/?start&at=vale)** · levels 1–10<br><sub>Meadow, lake and ruins. Where you start.</sub> | [![Whisperwood Deep](public/assets/site/forest-c.jpg)](https://cadle.gg/play/?start&at=forest)<br>**[Whisperwood Deep](https://cadle.gg/play/?start&at=forest)** · levels 5–11<br><sub>Closed canopy, fae light, The Elderheart.</sub> |
-| [![Frostveil Tundra](public/assets/site/tundra-c.jpg)](https://cadle.gg/play/?start&at=tundra)<br>**[Frostveil Tundra](https://cadle.gg/play/?start&at=tundra)** · levels 11–17<br><sub>Glacier shelves, pines, ice shards.</sub> | [![Shadowfen](public/assets/site/shadowfen-c.jpg)](https://cadle.gg/play/?start&at=shadowfen)<br>**[Shadowfen](https://cadle.gg/play/?start&at=shadowfen)** · levels 15–22<br><sub>Knee-deep peat murk and dead wood.</sub> |
-| [![Infernal Wastes](public/assets/site/infernal-c.jpg)](https://cadle.gg/play/?start&at=infernal)<br>**[Infernal Wastes](https://cadle.gg/play/?start&at=infernal)** · levels 18–25<br><sub>A caldera with lava rivers, still burning.</sub> | [![The Sunken Kingdom](public/assets/site/sunken-c.jpg)](https://cadle.gg/play/?start&at=sunken)<br>**[The Sunken Kingdom](https://cadle.gg/play/?start&at=sunken)** · levels 20–28<br><sub>Waterfalls, rapids, a drowned court.</sub> |
-| [![Dragon Peaks](public/assets/site/dragon-c.jpg)](https://cadle.gg/play/?start&at=dragon)<br>**[Dragon Peaks](https://cadle.gg/play/?start&at=dragon)** · levels 24–32<br><sub>200 m peaks and nest ledges.</sub> | [![Celestial Isles](public/assets/site/celestial-c.jpg)](https://cadle.gg/play/?start&at=celestial)<br>**[Celestial Isles](https://cadle.gg/play/?start&at=celestial)** · levels 30–38<br><sub>Marble plateau and floating isles.</sub> |
-| [![The Void](public/assets/site/void-c.jpg)](https://cadle.gg/play/?start&at=void)<br>**[The Void](https://cadle.gg/play/?start&at=void)** · levels 34–44<br><sub>Shelves over an abyss. Gravity is 0.55.</sub> | [![The Lost Realm](public/assets/site/lost-c.jpg)](https://cadle.gg/play/?start&at=lost)<br>**[The Lost Realm](https://cadle.gg/play/?start&at=lost)** · levels 40–50<br><sub>Endgame: rampart ring, sixteen monoliths.</sub> |
+- 원작 그대로 three.js r185 + postprocessing + @dgreenheck/ez-tree, 빌드는 Vite.
+- 번역은 소스를 다시 쓰지 않고 **표시 시점 번역 오버레이**(src/i18n/overlay.js + src/i18n/ko.json)로 적용합니다. 게임 로직이 영어 문자열을 비교하는 부분을 건드리지 않기 위해서입니다.
+- GitHub Actions 러너에서 원작 커밋을 복사 → 오버레이 주입 → Vite 빌드 → docs/ 게시 순서로 만들어집니다.
 
-Every region touches its two neighbours and has its own pass home through the mountain ring. Nothing
-is teleport-only — if you can see it you can walk to it, and the walk is most of the point.
-
----
-
-## What is actually in here
-
-**The world.** 2048 × 2048 m, one continuous heightfield, ten biomes. A mountain ring rises to ~150 m
-around the home bowl and is pierced by nine passes, one per outer region. Floating isles you can stand
-on, updraft columns that lift you, lava, water with real reflection and refraction, 0.55 g in the Void.
-Biome ownership is a partition, so a border is a line you cross rather than a corridor of nobody's-land.
-
-**Combat.** Eight weapon archetypes — hand cannon, auto rifle, pulse, scout, shotgun, sniper, fusion,
-beam — each with its own recoil pattern, ADS snap and reason to exist. Four abilities on cooldown
-(grenade, melee, class, super). Hit markers, damage numbers, stagger and death reactions.
-
-**RPG.** 65 quests across the ten regions (15 in the Vale alone), levels 1–50, a five-tier loot table
-(common → exotic) with published drop rates and real pity timers — hard pity at 20 / 90 / 400 drops.
-Quest content is **data**, not code: adding a quest never means writing a function, and CI asserts that
-every enemy and item a quest names actually exists.
-
-**Creatures.** 25 types, from wisps to the Archon — rigged GLBs with a LOD ladder, up to 72 alive.
-Camps stream by distance (300 m), so the population follows you around the map instead of being spent
-at spawn, and the starting meadow stays peaceful on purpose.
-
-**Graphics.** Cascaded shadow maps, ACES tone mapping, TAA, volumetric-looking clouds and god rays,
-long view distances with atmospheric haze, instanced grass that reacts to wind and to you, painterly
-materials tuned per biome, and a magical blue-violet night on a full day cycle.
-
-**Audio.** Fully synthesised — every gunshot, impact, explosion and the score itself is generated by
-`src/audio/`, not sampled. See [NOTICE](NOTICE) for why there are no recorded takes in this repository.
-
-![Creatures in the Vale](public/assets/site/combat-c.jpg)
-
----
-
-## Performance
-
-Measured on an RTX 3060 at 1920×1080, `q=high`, vsync off — so frame ms is real cost, not a wait:
-
-| | measured | budget |
-|---|---|---|
-| frame mean | **8.0 ms** (124 fps) | ≤ 7 ms |
-| p99 | **12.8 ms** | ≤ 14 ms |
-| draw calls | **235** | ≤ 350 |
-| triangles | **2.96 M** | ≤ 4 M |
-| memory over 30 s | flat at 468 MB | no growth |
-
-The live site holds 107 fps under the same harness. `q=low` targets ≤ 4 ms for laptops. Hitches count
-as failures: `tools/hitchhunt.mjs` records every frame and blames each spike on the system that was
-slow on it, because percentiles hide a single 1 s stall.
-
----
-
-## Run it locally
+## 설치·실행
 
 ```bash
 npm install
-npm run dev
+npm run dev        # http://127.0.0.1:5173/play/
+npm run build      # dist/ (Pages 배포는 /cadle-ko/ 기준 경로)
 ```
 
-- `http://127.0.0.1:5173/` — the marketing site
-- `http://127.0.0.1:5173/play/` — the game
+## 라이선스·원작 표기
 
-Node 22, a WebGL2 browser, Chromium recommended. **Nothing loads until you press Play**: landing on
-`/play/` builds no renderer, no world and no asset preload — the title screen is idle until you ask.
+- 원작 코드는 **MIT**(LICENSE 유지). 원작 NOTICE도 원문 그대로 유지했습니다.
+- 원작 NOTICE에 따르면 public/assets/의 이미지·모델은 MIT 라이선스 부여 대상이 아니고, 원작자는 공개용 포크라면 에셋을 다시 만들거나 교체하라고 적었습니다. 이 저장소는 게임이 그대로 실행되도록 원본 에셋을 포함하지만 에셋에 대해 어떤 라이선스도 주장하지 않으며, 원작자가 요청하면 즉시 제거합니다. (NOTICE-ko.md 참고)
+- 원작자와 무관한 비공식 한글화이며, 모든 권리는 원작자에게 있습니다.
 
-### URL parameters
+## [번역 외 변경]
 
-| parameter | what it does |
-|---|---|
-| `?at=<id>` | spawn in a region: `vale`, `forest`, `tundra`, `shadowfen`, `infernal`, `sunken`, `dragon`, `celestial`, `void`, `lost` |
-| `&back=N` | metres short of that region's landmark (default 150) |
-| `&start` | skip the title screen, go straight to loading |
-| `&q=` | quality preset: `low`, `medium`, `high`, `ultra` |
-| `&hour=H` | set and freeze the time of day |
-| `&seed=N` | world seed (default 1337) |
-| `&debug=1` | debug overlays |
-| `&auto=1` | automation mode: no click-to-start, synthetic input |
+- play/index.html, index.html에 한국어 오버레이 스크립트(src/i18n/overlay.js)를 추가했습니다.
+- GitHub Pages 하위 경로 배포를 위해 빌드 후 docs/에서 루트 절대 경로(/assets/…, /play)를 /cadle-ko/ 기준으로 치환합니다.
+- 개발용 자료(progress/, progress.html, .claude/, 원작 docs/는 upstream-docs/)는 배포본에서 제외했습니다.
+- 원작에는 분석·통계 스크립트나 의견 팝업이 없어 제거한 외부 기능은 없습니다.
+- 원작 README는 README.en.md로 보존했습니다.
 
-Play on a desktop — it is a mouse-and-keyboard shooter with no touch controls, and `/play/` says so on
-a phone rather than loading an engine you cannot drive.
+## 확인한 것 / 확인하지 못한 것
 
----
+- 확인: Pages 주소가 열리고 타이틀 화면·메뉴가 한국어로 표시됨, English 전환 동작, 하위 경로에서 에셋·모델 로딩, 빌드 산출물에 원작 외 외부 요청 없음.
+- 확인하지 못함: 클라우드 브라우저의 WebGL 성능 한계로 실제 3D 플레이(전투·퀘스트 진행)를 오래 해 보지 못했습니다. 인게임 퀘스트 화면의 긴 본문은 사전에 포함되어 있으나 화면에서 직접 확인하지 못했습니다.
 
-## How it is built
-
-Plain ES modules. No TypeScript, no framework, no state library. Vite for the dev server and the build;
-three.js r185 and `postprocessing` are the only runtime dependencies.
-
-```
-src/core/       game loop, fixed update order, input, asset preload
-src/render/     renderer, sky and time of day, lighting + CSM, post-processing
-src/world/      terrain (worker-baked heightfield), biomes, water, grass, vegetation, landmarks
-src/player/     movement physics, camera feel, weapons and viewmodels, abilities
-src/enemies/    creatures, AI, spawner, streaming        src/combat/  hit resolution, projectiles
-src/rpg/        quests (data), progression, loot, shop   src/vfx/     particles, tracers, decals
-src/audio/      synthesis: weapons, ambience, score      src/ui/      HUD, menus, title screen
-src/site/       cadle.gg — no engine, no three
-tools/          the harness: headless capture, regression gates, perf probes
-```
-
-Every file's header comment is that system's contract. [`CLAUDE.md`](CLAUDE.md) holds the architecture
-rules, the performance budget and the world layout.
-
-## Checks
-
-```bash
-node tools/invariants.mjs   # source guardrails: the bugs that keep coming back (also CI)
-node tools/check.mjs        # every module parses and its imports resolve (also CI)
-node tools/curvecheck.mjs   # xp curve closes, quest content exists, drop rates and pity hold (also CI)
-node tools/buildcheck.mjs   # the production build still ships a real entry on both pages (also CI)
-node tools/gate.mjs         # visual regression: bloom blobs, jitter, pointer lock — needs a GPU
-node tools/animcheck.mjs    # creatures actually animate: no T-pose, foot slide or moonwalk
-node tools/hitchhunt.mjs    # per-frame spike hunting, blamed on the system responsible
-node tools/inspect.mjs      # drive the running game headless and screenshot it
-```
-
-Each invariant encodes a bug that shipped more than once — that is the bar for adding one.
-
-## Licence
-
-Code is MIT — see [LICENSE](LICENSE). The asset files under `public/assets/` are **not** covered by
-that grant, and the recorded audio is not in this repository at all; [NOTICE](NOTICE) explains both,
-and the game synthesises everything it needs without them.
