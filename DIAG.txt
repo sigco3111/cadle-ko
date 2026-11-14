@@ -16,3 +16,45 @@ docs/assets/overlay-D-bcjymo.js
       2 https://cadle.gg
       2 http://www.w3.org
       1 https://jcgt.org
+rc=0
+--- tail ---
+[i18n]
+dict 2087
+[npm install]
+
+added 47 packages in 4s
+[build]
+build_rc=0
+[main a143481] 게임: 한국어 오버레이 적용·빌드
+ 16 files changed, 237 insertions(+), 237 deletions(-)
+ rename docs/assets/{landing-gdYBN4Tk.js => landing-od9Movp2.js} (99%)
+ rename docs/assets/{overlay-CQdG0Y56.js => overlay-D-bcjymo.js} (98%)
+ rename docs/assets/{play-BgwND8mY.js => play-ZLaeGGuC.js} (82%)
+ delete mode 100644 docs/glossary.md
+ create mode 100644 i18n/extracted2/INDEX.txt
+ create mode 100644 i18n/extracted2/part-01.json
+ create mode 100644 i18n/extracted2/part-02.json
+ create mode 100644 i18n/extracted2/part-03.json
+ create mode 100644 i18n/extracted2/part-04.json
+ create mode 100644 i18n/extracted3/INDEX.txt
+ create mode 100644 i18n/extracted3/part-01.json
+To https://github.com/sigco3111/cadle-ko
+   e7569c5..a143481  HEAD -> main
+DONE4
+[docs]
+strings=293 parts=5strings=98 parts=1POLISH_DONE
+[main 5de30da] 정리: 임시 실행 워크플로·트리거 파일 삭제
+ 11 files changed, 114 insertions(+), 174 deletions(-)
+ delete mode 100644 .github/workflows/ko-run.yml
+ delete mode 100644 .ko/payload.txt
+ create mode 100644 docs/glossary.md
+ delete mode 100644 i18n/extracted2/INDEX.txt
+ delete mode 100644 i18n/extracted2/part-01.json
+ delete mode 100644 i18n/extracted2/part-02.json
+ delete mode 100644 i18n/extracted2/part-03.json
+ delete mode 100644 i18n/extracted2/part-04.json
+ delete mode 100644 i18n/extracted3/INDEX.txt
+ delete mode 100644 i18n/extracted3/part-01.json
+To https://github.com/sigco3111/cadle-ko
+   a143481..5de30da  HEAD -> main
+CLEANUP_DONE
