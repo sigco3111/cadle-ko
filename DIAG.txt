@@ -1,216 +1,25 @@
-upstream_sha=ea0da62549980816a6a27e08b75808b1f56d70e7
-repo_size=315M docs_size=37M files=158
---- docs top ---
-docs/index.html
-docs/.htaccess
-docs/.nojekyll
-docs/play/index.html
-docs/assets/Vegetation-CLfTAgny.js
-docs/assets/Input-B7-Zafj9.js
-docs/assets/play-BOU-JJo_.js
-docs/assets/backdrop-3nVERy0A.js
-docs/assets/Game-BOy5knvV.js
-docs/assets/terrainWorker-KCRvMtck.js
-docs/assets/main-Cm3Q88lA.js
-docs/assets/three.module-gN7TBLi5.js
-docs/assets/Renderer-Cc-ETMVl.js
-docs/assets/ui-BPc-oNlE.css
-docs/assets/Renderer-ByW_sO0r.js
-docs/assets/backdrop-DY4ioovq.js
-docs/assets/landing-D-KRBlpc.js
-docs/assets/EZTrees-BXmt3ghE.js
-docs/assets/backdropWorker-DDSAL5vn.js
-docs/assets/play-Dp33w52n.css
---- external hosts ---
-      2 https://cadle.gg
-      1 https://github.com
-      1 http://www.w3.org
-      1 http://127.0.0.1
---- absolute asset refs ---
-count=115
-src/ui/rpgscreens.js:130:`/assets/ui/items/${k}.png
-src/ui/rpgscreens.js:137:"/assets/ui/items/${k}.png
-src/ui/Menu.js:47:'/assets/ui/menu_vista.jpg
-src/ui/screencss.js:402:'/assets/ui/doll.png
-src/ui/screencss.js:403:'/assets/ui/doll.png
-src/world/Terrain.js:501:`/assets/tex/${nm}.jpg
-src/site/scene.js:22:`/assets/site/${id}-b.jpg
-src/site/scene.js:23:'/assets/ui/menu_vista.jpg
-src/site/main.js:144:'/assets/ui/menu_vista.jpg
-src/site/ui.js:526:`/assets/music/${key}-theme.mp3
---- ui render style ---
-src/ui/HUD.js innerHTML=9 textContent=14 fillText=1 createElement=12
-src/ui/rpgscreens.js innerHTML=11 textContent=0 fillText=0 createElement=0
-src/ui/Screens.js innerHTML=1 textContent=4 fillText=0 createElement=2
-src/ui/Menu.js innerHTML=2 textContent=8 fillText=0 createElement=0
-src/ui/mapscreen.js innerHTML=0 textContent=0 fillText=6 createElement=2
---- extract index ---
-files=40 strings=1112 parts=7--- built play html ---
-href="/cadle-ko/assets/ui/mark/icon-32.png"
-href="/cadle-ko/assets/ui/mark/icon-16.png"
-href="/cadle-ko/assets/ui/mark/icon-180.png"
-href="/cadle-ko/assets/ui-BPc-oNlE.css"
-src="/cadle-ko/assets/play-BOU-JJo_.js"
-href="/cadle-ko/assets/modulepreload-polyfill-P2Xu9kJm.js"
-href="/cadle-ko/assets/preload-helper-Qquu6oyz.js"
-href="/cadle-ko/assets/play-Dp33w52n.css"
-href="/"
+doc=https://docs.google.com/document/d/1VZFEjxVNJE69RXAX28JlFqiGXPPsJNRMPeoRQdXtl0M/export?format=txt
+downloaded=12527
+script=9392
 rc=0
 --- tail ---
-docs/assets/creatures/drake.glb
- create mode 100644 docs/assets/creatures/farmwoman.glb
- create mode 100644 docs/assets/creatures/fisherman.glb
- create mode 100644 docs/assets/creatures/frostwolf.glb
- create mode 100644 docs/assets/creatures/giant.glb
- create mode 100644 docs/assets/creatures/golem.glb
- create mode 100644 docs/assets/creatures/guard.glb
- create mode 100644 docs/assets/creatures/herbwife.glb
- create mode 100644 docs/assets/creatures/hound.glb
- create mode 100644 docs/assets/creatures/mason.glb
- create mode 100644 docs/assets/creatures/merchant.glb
- create mode 100644 docs/assets/creatures/raider.glb
- create mode 100644 docs/assets/creatures/riftling.glb
- create mode 100644 docs/assets/creatures/scholar.glb
- create mode 100644 docs/assets/creatures/sentinel.glb
- create mode 100644 docs/assets/creatures/serpent.glb
- create mode 100644 docs/assets/creatures/sprite.glb
- create mode 100644 docs/assets/creatures/treant.glb
- create mode 100644 docs/assets/creatures/warden.glb
- create mode 100644 docs/assets/creatures/wayfinder.glb
- create mode 100644 docs/assets/creatures/wraith.glb
- create mode 100644 docs/assets/landing-D-KRBlpc.js
- create mode 100644 docs/assets/main-Cm3Q88lA.js
- create mode 100644 docs/assets/modulepreload-polyfill-P2Xu9kJm.js
- create mode 100644 docs/assets/play-BOU-JJo_.js
- create mode 100644 docs/assets/play-Dp33w52n.css
- create mode 100644 docs/assets/preload-helper-Qquu6oyz.js
- create mode 100644 docs/assets/site/ability-b.jpg
- create mode 100644 docs/assets/site/ability-c.jpg
- create mode 100644 docs/assets/site/ability-sm.jpg
- create mode 100644 docs/assets/site/ability.jpg
- create mode 100644 docs/assets/site/beasts/drake.webp
- create mode 100644 docs/assets/site/beasts/golem.webp
- create mode 100644 docs/assets/site/beasts/hound.webp
- create mode 100644 docs/assets/site/beasts/sentinel.webp
- create mode 100644 docs/assets/site/beasts/sprite.webp
- create mode 100644 docs/assets/site/beasts/wraith.webp
- create mode 100644 docs/assets/site/celestial-b.jpg
- create mode 100644 docs/assets/site/celestial-c.jpg
- create mode 100644 docs/assets/site/combat-b.jpg
- create mode 100644 docs/assets/site/combat-c.jpg
- create mode 100644 docs/assets/site/creatures-b.jpg
- create mode 100644 docs/assets/site/creatures-c.jpg
- create mode 100644 docs/assets/site/dragon-b.jpg
- create mode 100644 docs/assets/site/dragon-c.jpg
- create mode 100644 docs/assets/site/forest-b.jpg
- create mode 100644 docs/assets/site/forest-c.jpg
- create mode 100644 docs/assets/site/forest-sm.jpg
- create mode 100644 docs/assets/site/forest.jpg
- create mode 100644 docs/assets/site/infernal-b.jpg
- create mode 100644 docs/assets/site/infernal-c.jpg
- create mode 100644 docs/assets/site/infernal-sm.jpg
- create mode 100644 docs/assets/site/infernal.jpg
- create mode 100644 docs/assets/site/loot-b.jpg
- create mode 100644 docs/assets/site/loot-c.jpg
- create mode 100644 docs/assets/site/loot-sm.jpg
- create mode 100644 docs/assets/site/loot.jpg
- create mode 100644 docs/assets/site/lost-b.jpg
- create mode 100644 docs/assets/site/lost-c.jpg
- create mode 100644 docs/assets/site/lost-sm.jpg
- create mode 100644 docs/assets/site/lost.jpg
- create mode 100644 docs/assets/site/shadowfen-b.jpg
- create mode 100644 docs/assets/site/shadowfen-c.jpg
- create mode 100644 docs/assets/site/sunken-b.jpg
- create mode 100644 docs/assets/site/sunken-c.jpg
- create mode 100644 docs/assets/site/tundra-b.jpg
- create mode 100644 docs/assets/site/tundra-c.jpg
- create mode 100644 docs/assets/site/vale-b.jpg
- create mode 100644 docs/assets/site/vale-c.jpg
- create mode 100644 docs/assets/site/void-b.jpg
- create mode 100644 docs/assets/site/void-c.jpg
- create mode 100644 docs/assets/site/void-sm.jpg
- create mode 100644 docs/assets/site/void.jpg
- create mode 100644 docs/assets/site/w-autorifle.jpg
- create mode 100644 docs/assets/site/w-beam.jpg
- create mode 100644 docs/assets/site/w-fusion.jpg
- create mode 100644 docs/assets/site/w-handcannon.jpg
- create mode 100644 docs/assets/site/w-pulse.jpg
- create mode 100644 docs/assets/site/w-scout.jpg
- create mode 100644 docs/assets/site/w-shotgun.jpg
- create mode 100644 docs/assets/site/w-sniper.jpg
- create mode 100644 docs/assets/terrainWorker-KCRvMtck.js
- create mode 100644 docs/assets/tex/ash_basalt.jpg
- create mode 100644 docs/assets/tex/bark.jpg
- create mode 100644 docs/assets/tex/bark_gnarled.jpg
- create mode 100644 docs/assets/tex/basalt_columnar.jpg
- create mode 100644 docs/assets/tex/beach_sand.jpg
- create mode 100644 docs/assets/tex/card_conifer_snow.webp
- create mode 100644 docs/assets/tex/card_fern.webp
- create mode 100644 docs/assets/tex/card_moss.webp
- create mode 100644 docs/assets/tex/card_reed.webp
- create mode 100644 docs/assets/tex/celestial_marble.jpg
- create mode 100644 docs/assets/tex/cliff_strata.jpg
- create mode 100644 docs/assets/tex/egg_speckle.jpg
- create mode 100644 docs/assets/tex/flagstone_violet.jpg
- create mode 100644 docs/assets/tex/forest_soil.jpg
- create mode 100644 docs/assets/tex/glove_leather.jpg
- create mode 100644 docs/assets/tex/glyph-ring-1.jpg
- create mode 100644 docs/assets/tex/glyph-ring-2.jpg
- create mode 100644 docs/assets/tex/granite_carved.jpg
- create mode 100644 docs/assets/tex/granite_detail.jpg
- create mode 100644 docs/assets/tex/granite_moss.jpg
- create mode 100644 docs/assets/tex/grass_albedo.jpg
- create mode 100644 docs/assets/tex/ice_glacial.jpg
- create mode 100644 docs/assets/tex/lava_crust.jpg
- create mode 100644 docs/assets/tex/leaf_card.webp
- create mode 100644 docs/assets/tex/marble_strata.jpg
- create mode 100644 docs/assets/tex/megalith_violet.jpg
- create mode 100644 docs/assets/tex/peat_muck.jpg
- create mode 100644 docs/assets/tex/ruins_stone.jpg
- create mode 100644 docs/assets/tex/seabed_ripple.jpg
- create mode 100644 docs/assets/tex/snow.jpg
- create mode 100644 docs/assets/tex/snow_sastrugi.jpg
- create mode 100644 docs/assets/tex/vale_portrait.jpg
- create mode 100644 docs/assets/tex/voidstone.jpg
- create mode 100644 docs/assets/three.module-D8grxCpE.js
- create mode 100644 docs/assets/three.module-gN7TBLi5.js
- create mode 100644 docs/assets/ui-BPc-oNlE.css
- create mode 100644 docs/assets/ui/doll-src.png
- create mode 100644 docs/assets/ui/doll.png
- create mode 100644 docs/assets/ui/items/arms.png
- create mode 100644 docs/assets/ui/items/autorifle.png
- create mode 100644 docs/assets/ui/items/beam.png
- create mode 100644 docs/assets/ui/items/chest.png
- create mode 100644 docs/assets/ui/items/cloak.png
- create mode 100644 docs/assets/ui/items/fusion.png
- create mode 100644 docs/assets/ui/items/handcannon.png
- create mode 100644 docs/assets/ui/items/head.png
- create mode 100644 docs/assets/ui/items/legs.png
- create mode 100644 docs/assets/ui/items/pulse.png
- create mode 100644 docs/assets/ui/items/scout.png
- create mode 100644 docs/assets/ui/items/shotgun.png
- create mode 100644 docs/assets/ui/items/sniper.png
- create mode 100644 docs/assets/ui/mark/gem.webp
- create mode 100644 docs/assets/ui/mark/icon-16.png
- create mode 100644 docs/assets/ui/mark/icon-180.png
- create mode 100644 docs/assets/ui/mark/icon-32.png
- create mode 100644 docs/assets/ui/mark/icon-48.png
- create mode 100644 docs/assets/ui/mark/icon-96.png
- create mode 100644 docs/assets/ui/mark/mark-180.webp
- create mode 100644 docs/assets/ui/mark/mark-512.webp
- create mode 100644 docs/assets/ui/mark/ring.webp
- create mode 100644 docs/assets/ui/mark/ticks.webp
- create mode 100644 docs/assets/ui/menu_vista.jpg
- create mode 100644 docs/index.html
- create mode 100644 docs/play/index.html
- create mode 100644 i18n/extracted/INDEX.txt
- create mode 100644 i18n/extracted/part-01.json
- create mode 100644 i18n/extracted/part-02.json
- create mode 100644 i18n/extracted/part-03.json
- create mode 100644 i18n/extracted/part-04.json
- create mode 100644 i18n/extracted/part-05.json
- create mode 100644 i18n/extracted/part-06.json
- create mode 100644 i18n/extracted/part-07.json
-To https://github.com/sigco3111/cadle-ko
-   f1128f8..738411b  HEAD -> main
-DONE3
+[i18n]
+base64: error: invalid input
+node:internal/modules/cjs/loader:2075
+    throw err;
+    ^
+
+SyntaxError: /home/runner/work/cadle-ko/cadle-ko/src/i18n/ko.json: Unexpected end of JSON input
+    at parse (<anonymous>)
+    at Object..json (node:internal/modules/cjs/loader:2072:39)
+    at Module.load (node:internal/modules/cjs/loader:1651:32)
+    at Module._load (node:internal/modules/cjs/loader:1443:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
+    at Module.require (node:internal/modules/cjs/loader:1674:12)
+    at require (node:internal/modules/helpers:157:16)
+    at [eval]:1:9
+    at runScriptInThisContext (node:internal/vm:219:10)
+    at node:internal/process/execution:451:12
+
+Node.js v24.22.2
+/tmp/payload.sh: line 219: warning: here-document at line 18 delimited by end-of-file (wanted `OVERLAY_EOF')
