@@ -7,6 +7,7 @@ const DOCS = path.resolve('docs');
 const OUT = path.join(DOCS, 'screenshots');
 const PREFIX = '/cadle-ko/';
 const PORT = 8123;
+const T = 120000;
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -52,78 +53,95 @@ await new Promise((r) => server.listen(PORT, '127.0.0.1', r));
 const browser = await chromium.launch({
   args: ['--no-sandbox', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
 });
-const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1.5 });
+const page = await browser.newPage({ viewport: { width: 1280, height: 800 }, deviceScaleFactor: 1 });
+page.setDefaultTimeout(T);
+page.setDefaultNavigationTimeout(T);
+
+let failures = 0;
 
 const shot = async (name) => {
-  await page.screenshot({ path: path.join(OUT, name) });
-  console.log('shot ' + name);
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      await page.screenshot({ path: path.join(OUT, name), timeout: T, animations: 'disabled', caret: 'hide' });
+      console.log('shot ' + name + ' (attempt ' + attempt + ')');
+      return true;
+    } catch (err) {
+      console.log('shot failed ' + name + ' attempt ' + attempt + ' :: ' + (err && err.message ? err.message.split('\n')[0] : err));
+      await sleep(2000);
+    }
+  }
+  failures += 1;
+  return false;
 };
 
 const step = async (label, fn) => {
   try {
     await fn();
   } catch (err) {
-    console.log('step failed: ' + label + ' :: ' + (err && err.message));
+    failures += 1;
+    console.log('step failed: ' + label + ' :: ' + (err && err.message ? err.message.split('\n')[0] : err));
   }
 };
 
-await page.goto('http://127.0.0.1:' + PORT + PREFIX + 'play/', { waitUntil: 'load', timeout: 120000 });
-await sleep(12000);
+const clickText = async (name) => {
+  await page.getByRole('button', { name, exact: true }).first().click({ timeout: T });
+};
 
-await step('title', async () => {
-  await shot('01-title.png');
-});
+await page.goto('http://127.0.0.1:' + PORT + PREFIX + 'play/', { waitUntil: 'load', timeout: T });
+await sleep(15000);
+
+await step('title', () => shot('01-title.png'));
 
 await step('regions', async () => {
-  await page.getByRole('button', { name: '골짜기', exact: true }).first().click();
-  await sleep(2500);
+  await clickText('골짜기');
+  await sleep(4000);
   await shot('02-regions.png');
 });
 
 await step('controls', async () => {
-  await page.getByRole('button', { name: '조작', exact: true }).first().click();
-  await sleep(2000);
+  await clickText('조작');
+  await sleep(4000);
   await shot('03-controls.png');
 });
 
 await step('settings', async () => {
-  await page.getByRole('button', { name: '설정', exact: true }).first().click();
-  await sleep(2000);
+  await clickText('설정');
+  await sleep(4000);
   await shot('04-settings.png');
 });
 
 await step('credits', async () => {
-  await page.getByRole('button', { name: '크레딧', exact: true }).first().click();
-  await sleep(2000);
+  await clickText('크레딧');
+  await sleep(4000);
   await shot('05-credits.png');
 });
 
 await step('korean-credit-panel', async () => {
-  await page.locator('#cadle-ko-bar button', { hasText: '크레딧' }).first().click();
-  await sleep(1200);
+  await page.locator('#cadle-ko-bar button', { hasText: '크레딧' }).first().click({ timeout: T });
+  await sleep(2000);
   await shot('06-credit-panel.png');
 });
 
 await step('english-toggle', async () => {
-  await page.getByRole('button', { name: 'English', exact: true }).first().click();
-  await sleep(2500);
+  await clickText('English');
+  await sleep(5000);
   await shot('07-english.png');
-  await page.getByRole('button', { name: '한국어', exact: true }).first().click();
-  await sleep(2000);
+  await clickText('한국어');
+  await sleep(3000);
 });
 
 await step('ingame', async () => {
-  await page.getByRole('button', { name: '플레이', exact: true }).first().click();
-  await sleep(25000);
+  await clickText('플레이');
+  await sleep(45000);
   await shot('08-ingame.png');
 });
 
 await step('landing', async () => {
-  await page.goto('http://127.0.0.1:' + PORT + PREFIX, { waitUntil: 'load', timeout: 120000 });
-  await sleep(6000);
+  await page.goto('http://127.0.0.1:' + PORT + PREFIX, { waitUntil: 'load', timeout: T });
+  await sleep(8000);
   await shot('09-landing.png');
 });
 
 await browser.close();
 server.close();
-console.log('screenshots done');
+console.log('screenshots done, failures=' + failures);
