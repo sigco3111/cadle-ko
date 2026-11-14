@@ -1,14 +1,14 @@
 upstream_sha=ea0da62549980816a6a27e08b75808b1f56d70e7
-dict_entries=1292
+dict_entries=1306
 long=strings=65 parts=4
 repo_size=319M docs_size=37M
 --- play html scripts ---
 <script>
 <script>
-<script type="module" crossorigin src="/cadle-ko/assets/play-nGORjtN2.js">
+<script type="module" crossorigin src="/cadle-ko/assets/play-D1YYEzj4.js">
 <script>
 --- overlay in bundle ---
-docs/assets/overlay-DybIPxJt.js
+docs/assets/overlay-DOSP3N5Y.js
 --- leftover root-absolute asset refs in docs ---
 0
 --- external hosts in built ---
@@ -16,57 +16,3 @@ docs/assets/overlay-DybIPxJt.js
       2 https://cadle.gg
       2 http://www.w3.org
       1 https://jcgt.org
-rc=0
---- tail ---
-[i18n]
-dict 1292
-[npm install]
-
-added 45 packages in 4s
-[build]
-build_rc=0
-[main 5dd9415] 게임: 한국어 오버레이 적용·빌드
- 9 files changed, 148 insertions(+), 125 deletions(-)
- rename docs/assets/{landing-DXnng1qf.js => landing-nVgifNuR.js} (99%)
- rename docs/assets/{overlay-CStuWkC2.js => overlay-DybIPxJt.js} (72%)
- rename docs/assets/{play-Dw3u73Ku.js => play-nGORjtN2.js} (82%)
- delete mode 100644 docs/glossary.md
-To https://github.com/sigco3111/cadle-ko
-   333a294..5dd9415  HEAD -> main
-DONE4
-[docs]
-strings=293 parts=5strings=98 parts=1[main 8c285d9] 정리: 임시 실행 워크플로·트리거 파일 삭제
- 31 files changed, 127 insertions(+), 248 deletions(-)
- delete mode 100644 .github/workflows/ko-run.yml
- delete mode 100644 .github/workflows/ko-run2.yml
- delete mode 100644 .github/workflows/ko-run3.yml
- delete mode 100644 .ko/payload.txt
- delete mode 100644 .ko/run.md
- create mode 100644 docs/glossary.md
- delete mode 100644 i18n/extracted/INDEX.txt
- delete mode 100644 i18n/extracted/part-01.json
- delete mode 100644 i18n/extracted/part-02.json
- delete mode 100644 i18n/extracted/part-03.json
- delete mode 100644 i18n/extracted/part-04.json
- delete mode 100644 i18n/extracted/part-05.json
- delete mode 100644 i18n/extracted/part-06.json
- delete mode 100644 i18n/extracted/part-07.json
- delete mode 100644 i18n/extracted2/INDEX.txt
- delete mode 100644 i18n/extracted2/part-01.json
- delete mode 100644 i18n/extracted2/part-02.json
- delete mode 100644 i18n/extracted2/part-03.json
- delete mode 100644 i18n/extracted2/part-04.json
- delete mode 100644 i18n/extracted3/INDEX.txt
- delete mode 100644 i18n/extracted3/part-01.json
- delete mode 100644 i18n/extracted4/INDEX.txt
- delete mode 100644 i18n/extracted4/part-01.json
- delete mode 100644 i18n/extracted4/part-02.json
- delete mode 100644 i18n/extracted4/part-03.json
- delete mode 100644 i18n/extracted4/part-04.json
- delete mode 100644 i18n/extracted4/part-05.json
- delete mode 100644 i18n/extracted5/INDEX.txt
- delete mode 100644 i18n/extracted5/part-01.json
- create mode 100644 tools/build-ko.sh
-To https://github.com/sigco3111/cadle-ko
-   5dd9415..8c285d9  HEAD -> main
-CLEANUP_DONE
