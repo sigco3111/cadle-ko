@@ -1,14 +1,14 @@
 upstream_sha=ea0da62549980816a6a27e08b75808b1f56d70e7
-dict_entries=1306
+dict_entries=2087
 long=strings=65 parts=4
-repo_size=319M docs_size=37M
+repo_size=320M docs_size=38M
 --- play html scripts ---
 <script>
 <script>
-<script type="module" crossorigin src="/cadle-ko/assets/play-D1YYEzj4.js">
+<script type="module" crossorigin src="/cadle-ko/assets/play-BgwND8mY.js">
 <script>
 --- overlay in bundle ---
-docs/assets/overlay-DOSP3N5Y.js
+docs/assets/overlay-CQdG0Y56.js
 --- leftover root-absolute asset refs in docs ---
 0
 --- external hosts in built ---
@@ -16,31 +16,3 @@ docs/assets/overlay-DOSP3N5Y.js
       2 https://cadle.gg
       2 http://www.w3.org
       1 https://jcgt.org
-rc=0
---- tail ---
-[i18n]
-dict 1306
-[npm install]
-
-added 47 packages in 4s
-[build]
-build_rc=0
-[main 93a063f] 게임: 한국어 오버레이 적용·빌드
- 17 files changed, 148 insertions(+), 275 deletions(-)
- rename docs/assets/{landing-nVgifNuR.js => landing-C4w67yUX.js} (99%)
- rename docs/assets/{overlay-DybIPxJt.js => overlay-DOSP3N5Y.js} (97%)
- rename docs/assets/{play-nGORjtN2.js => play-D1YYEzj4.js} (82%)
- delete mode 100644 docs/glossary.md
- create mode 100644 i18n/extracted2/INDEX.txt
- create mode 100644 i18n/extracted2/part-01.json
- create mode 100644 i18n/extracted2/part-02.json
- create mode 100644 i18n/extracted2/part-03.json
- create mode 100644 i18n/extracted2/part-04.json
- create mode 100644 i18n/extracted3/INDEX.txt
- create mode 100644 i18n/extracted3/part-01.json
-To https://github.com/sigco3111/cadle-ko
-   99ec9a6..93a063f  HEAD -> main
-DONE4
-[docs]
-strings=293 parts=5strings=98 parts=1extracted 1481 parts 10
-new=1481 parts=10
