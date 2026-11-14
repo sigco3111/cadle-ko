@@ -1,25 +1,9 @@
-doc=https://docs.google.com/document/d/1VZFEjxVNJE69RXAX28JlFqiGXPPsJNRMPeoRQdXtl0M/export?format=txt
-downloaded=12527
-script=9392
-rc=0
---- tail ---
-[i18n]
-base64: error: invalid input
-node:internal/modules/cjs/loader:2075
-    throw err;
-    ^
-
-SyntaxError: /home/runner/work/cadle-ko/cadle-ko/src/i18n/ko.json: Unexpected end of JSON input
-    at parse (<anonymous>)
-    at Object..json (node:internal/modules/cjs/loader:2072:39)
-    at Module.load (node:internal/modules/cjs/loader:1651:32)
-    at Module._load (node:internal/modules/cjs/loader:1443:12)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
-    at Module.require (node:internal/modules/cjs/loader:1674:12)
-    at require (node:internal/modules/helpers:157:16)
-    at [eval]:1:9
-    at runScriptInThisContext (node:internal/vm:219:10)
-    at node:internal/process/execution:451:12
-
-Node.js v24.22.2
-/tmp/payload.sh: line 219: warning: here-document at line 18 delimited by end-of-file (wanted `OVERLAY_EOF')
+upstream_sha=ea0da62549980816a6a27e08b75808b1f56d70e7
+dict_entries=
+long=strings=65 parts=4
+repo_size=245M docs_size=4.0K
+--- play html scripts ---
+--- overlay in bundle ---
+--- leftover root-absolute asset refs in docs ---
+0
+--- external hosts in built ---
