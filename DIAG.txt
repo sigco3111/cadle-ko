@@ -1,14 +1,14 @@
 upstream_sha=ea0da62549980816a6a27e08b75808b1f56d70e7
-dict_entries=1120
+dict_entries=1292
 long=strings=65 parts=4
 repo_size=319M docs_size=37M
 --- play html scripts ---
 <script>
 <script>
-<script type="module" crossorigin src="/cadle-ko/assets/play-Dw3u73Ku.js">
+<script type="module" crossorigin src="/cadle-ko/assets/play-nGORjtN2.js">
 <script>
 --- overlay in bundle ---
-docs/assets/overlay-CStuWkC2.js
+docs/assets/overlay-DybIPxJt.js
 --- leftover root-absolute asset refs in docs ---
 0
 --- external hosts in built ---
@@ -16,23 +16,3 @@ docs/assets/overlay-CStuWkC2.js
       2 https://cadle.gg
       2 http://www.w3.org
       1 https://jcgt.org
-rc=0
---- tail ---
-[i18n]
-dict 1120
-[npm install]
-
-added 45 packages in 4s
-[build]
-build_rc=0
-[main 8af1d7e] 게임: 한국어 오버레이 적용·빌드
- 9 files changed, 148 insertions(+), 125 deletions(-)
- rename docs/assets/{landing-B-JkKIJZ.js => landing-DXnng1qf.js} (99%)
- rename docs/assets/{overlay-CqlmUN1j.js => overlay-CStuWkC2.js} (77%)
- rename docs/assets/{play-5MwPgRVr.js => play-Dw3u73Ku.js} (82%)
- delete mode 100644 docs/glossary.md
-To https://github.com/sigco3111/cadle-ko
-   8a44ce4..8af1d7e  HEAD -> main
-DONE4
-[docs]
-strings=293 parts=5strings=98 parts=1
