@@ -40,7 +40,7 @@
 - 원작 그대로: three.js r185, postprocessing, @dgreenheck/ez-tree, Vite 빌드
 - 번역 방식: 게임 로직을 고치지 않고 **표시 시점 번역 오버레이**로 처리합니다.
   - `src/i18n/overlay.js` — DOM 텍스트를 관찰해 사전에 있는 문구만 바꿉니다. 원문은 보존해 두었다가 English로 되돌립니다.
-  - `src/i18n/ko.json` — 원문 → 한국어 사전(약 1,290개 항목) + 동적 문구 정규식 규칙
+  - `src/i18n/ko.json` — 원문 → 한국어 사전(약 2,090개 항목) + 동적 문구 정규식 규칙
 - 배포: GitHub Actions 러너가 원작 커밋을 복사 → 오버레이 주입 → `npm install` → `vite build --base=/cadle-ko/` → `docs/` 게시
 - Pages 하위 경로 때문에 빌드 후 `docs/`의 루트 절대 경로(`/assets/…`, `/play`)를 `/cadle-ko/` 기준으로 치환합니다.
 
