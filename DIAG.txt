@@ -16,3 +16,57 @@ docs/assets/overlay-CQdG0Y56.js
       2 https://cadle.gg
       2 http://www.w3.org
       1 https://jcgt.org
+rc=0
+--- tail ---
+[i18n]
+dict 2087
+[npm install]
+
+added 47 packages in 4s
+[build]
+build_rc=0
+[main 8e18d12] 게임: 한국어 오버레이 적용·빌드
+ 9 files changed, 142 insertions(+), 154 deletions(-)
+ rename docs/assets/{landing-C4w67yUX.js => landing-gdYBN4Tk.js} (99%)
+ rename docs/assets/{overlay-DOSP3N5Y.js => overlay-CQdG0Y56.js} (70%)
+ rename docs/assets/{play-D1YYEzj4.js => play-BgwND8mY.js} (82%)
+ delete mode 100644 docs/glossary.md
+To https://github.com/sigco3111/cadle-ko
+   3f77188..8e18d12  HEAD -> main
+DONE4
+[docs]
+strings=293 parts=5strings=98 parts=1POLISH_DONE
+[main 2e29433] 정리: 임시 실행 워크플로·트리거 파일 삭제
+ 30 files changed, 114 insertions(+), 194 deletions(-)
+ delete mode 100644 .github/workflows/ko-run.yml
+ delete mode 100644 .ko/payload.txt
+ create mode 100644 docs/glossary.md
+ delete mode 100644 i18n/extracted2/INDEX.txt
+ delete mode 100644 i18n/extracted2/part-01.json
+ delete mode 100644 i18n/extracted2/part-02.json
+ delete mode 100644 i18n/extracted2/part-03.json
+ delete mode 100644 i18n/extracted2/part-04.json
+ delete mode 100644 i18n/extracted3/INDEX.txt
+ delete mode 100644 i18n/extracted3/part-01.json
+ delete mode 100644 i18n/extracted4/INDEX.txt
+ delete mode 100644 i18n/extracted4/part-01.json
+ delete mode 100644 i18n/extracted4/part-02.json
+ delete mode 100644 i18n/extracted4/part-03.json
+ delete mode 100644 i18n/extracted4/part-04.json
+ delete mode 100644 i18n/extracted4/part-05.json
+ delete mode 100644 i18n/extracted5/INDEX.txt
+ delete mode 100644 i18n/extracted5/part-01.json
+ delete mode 100644 i18n/extracted6/INDEX.txt
+ delete mode 100644 i18n/extracted6/part-01.json
+ delete mode 100644 i18n/extracted6/part-02.json
+ delete mode 100644 i18n/extracted6/part-03.json
+ delete mode 100644 i18n/extracted6/part-04.json
+ delete mode 100644 i18n/extracted6/part-05.json
+ delete mode 100644 i18n/extracted6/part-06.json
+ delete mode 100644 i18n/extracted6/part-07.json
+ delete mode 100644 i18n/extracted6/part-08.json
+ delete mode 100644 i18n/extracted6/part-09.json
+ delete mode 100644 i18n/extracted6/part-10.json
+To https://github.com/sigco3111/cadle-ko
+   8e18d12..2e29433  HEAD -> main
+CLEANUP_DONE
