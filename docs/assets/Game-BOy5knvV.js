@@ -4467,7 +4467,7 @@ void main() {
 /* The figure fills the box's HEIGHT and takes its width from that height, so it keeps one shape at
    every window size. Every slot is placed from this same box (see --pdw above), which is the whole
    reason the plates now land on the anatomy instead of near it. */
-/* The silhouette is the user's own PNG (public/cadle-ko/assets/ui/doll.png), applied as a MASK so the alpha
+/* The silhouette is the user's own PNG (public/assets/ui/doll.png), applied as a MASK so the alpha
    gives the shape and the gradient below gives the colour. The source is pure black; an <img> would
    stay black or need a filter chain to fake a tint, whereas a mask keeps one asset usable in any
    palette and costs nothing. -webkit- prefix stays for Safari, which still needs it. */
