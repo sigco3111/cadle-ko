@@ -1,0 +1,26 @@
+{
+  "name": "cadle",
+  "private": true,
+  "version": "0.6.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 5173 --strictPort --host 127.0.0.1",
+    "build": "vite build",
+    "preview": "vite preview --port 5173 --strictPort",
+    "inspect": "node tools/inspect.mjs"
+  },
+  "dependencies": {
+    "@dgreenheck/ez-tree": "^1.1.0",
+    "postprocessing": "^6.37.8",
+    "three": "^0.185.1"
+  },
+  "devDependencies": {
+    "playwright": "^1.62.1",
+    "vite": "^8.2.1",
+    "@gltf-transform/core": "^4.4.2",
+    "@gltf-transform/extensions": "^4.4.2",
+    "@gltf-transform/functions": "^4.4.2",
+    "meshoptimizer": "^0.25.0",
+    "sharp": "^0.34.0"
+  }
+}

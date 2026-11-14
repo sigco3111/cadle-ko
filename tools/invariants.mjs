@@ -1,0 +1,484 @@
+// invariants.mjs — SOURCE INVARIANTS. `node tools/invariants.mjs` — instant, no dev server.
+// Run this before you touch anything and again before you report done; tools/gate.mjs runs it too,
+// CI (.github/workflows/checks.yml) runs it on every push/PR, and the repo's .claude/settings.json
+// Stop hook runs it at the end of every agent turn.
+// Each rule below encodes a bug that has shipped MORE THAN ONCE. They kept coming back because a
+// later builder wrote a NEW code path that the prose rule in CLAUDE.md did not literally name.
+// Thresholds are orchestrator-owned: if a rule blocks legitimate work, say so in your report.
+import { readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+let failed = false;
+const fail = (msg) => { console.error('[invariants] FAIL: ' + msg); failed = true; };
+const srcFiles = [];
+(function walk(dir) {
+  for (const e of readdirSync(dir)) {
+    const p = join(dir, e);
+    if (statSync(p).isDirectory()) walk(p);
+    else if (p.endsWith('.js')) srcFiles.push(p);
+  }
+})('src');
+const read = (p) => { try { return readFileSync(p, 'utf8'); } catch { return ''; } };
+
+console.log('[invariants] checking...');
+
+// ---------------------------------------------------------------- (0) DOES IT EVEN PARSE?
+// Not a style rule — a truth rule, and it belongs FIRST because everything else in this file, and every
+// screenshot anyone takes, is meaningless if the module never loaded. A broken src/ file does not fail
+// loudly: the page throws once, `window.__game` never appears, and the harness reports "TIMEOUT waiting
+// for game to start" or simply captures the loading screen. Agents have then judged a DEAD PAGE and
+// reported success from it — three times on 2026-08-28/29 alone, twice from the same cause: a BACKTICK
+// typed inside a GLSL template literal (`// `trampleAt` thins...`), which ends the template early and
+// leaves the rest of the shader being parsed as JavaScript. The error surfaces as a bare
+// "SyntaxError: Unexpected identifier 'trampleAt'" pointing at a COMMENT, which reads like nonsense
+// unless you already know the trap. One parse pass makes it impossible to lose an hour to it again.
+{
+  const { spawn } = await import('node:child_process');
+  // Concurrency-limited pool. Firing all ~90 spawns at once took 44 s on this box (Windows process
+  // creation thrashes); a pool of 8 does the same work in ~2 s, and this tool's whole value is that
+  // people actually run it before they start and again before they report.
+  const check = (f) => new Promise((res) => {
+    const p = spawn(process.execPath, ['--check', f], { stdio: ['ignore', 'ignore', 'pipe'] });
+    let err = '';
+    p.stderr.on('data', (d) => { err += d; });
+    p.on('close', (code) => res(code === 0 ? null : { f, err }));
+    p.on('error', () => res(null));                     // cannot spawn: do not invent a failure
+  });
+  // INCREMENTAL. `node --check` is one process per file and this tool is run constantly — before every
+  // task, at the end of every agent turn via the Stop hook, and inside gate.mjs. A file that has not
+  // changed since it last parsed still parses, so cache (size, mtime) and only re-check what moved.
+  // First run pays the full cost; every later run checks the two or three files someone just edited.
+  const stampPath = join('tools', 'out', '.invariants-parse.json');
+  let stamp = {};
+  try { stamp = JSON.parse(readFileSync(stampPath, 'utf8')); } catch { /* first run, or unreadable */ }
+  const key = (f) => { try { const s = statSync(f); return `${s.size}:${Math.round(s.mtimeMs)}`; } catch { return 'gone'; } };
+  const queue = srcFiles.filter((f) => stamp[f] !== key(f));
+  const bad = [];
+  await Promise.all(Array.from({ length: 8 }, async () => {
+    for (let f = queue.pop(); f; f = queue.pop()) {
+      const r = await check(f);
+      if (r) bad.push(r); else stamp[f] = key(f);       // only a file that PARSED gets stamped
+    }
+  }));
+  try { writeFileSync(stampPath, JSON.stringify(stamp)); } catch { /* cache is an optimisation, never a gate */ }
+  for (const b of bad) {
+    const line = (b.err.split('\n').find((l) => /SyntaxError/.test(l)) ?? b.err.split('\n')[0] ?? '').trim();
+    fail(`${b.f} does not parse — the game will not boot and every capture of it is void. ${line}`
+       + '\n            If the reported line is a COMMENT, look for a ` inside a template literal: a backtick'
+       + '\n            ends the shader string and JavaScript starts parsing the GLSL after it.');
+  }
+}
+
+// ---------------------------------------------------------------- (a) POINTER LOCK: exactly one lock path.
+// Every regression of "the mouse escapes / camera stops at the screen edge" came from a builder adding
+// their own requestPointerLock without the unadjustedMovement-rejection + relock-cooldown handling that
+// Input.lock() has — or from removing the HUD/menu hookup into it.
+for (const f of srcFiles) {
+  if (f.endsWith(join('core', 'Input.js'))) continue;
+  if (/requestPointerLock/.test(read(f))) {
+    fail(`${f} calls requestPointerLock directly — use Input.lock(canvas), the single lock path (it handles unadjustedMovement rejection + Chrome's relock cooldown; bypassing it is how the mouse keeps escaping the window)`);
+  }
+}
+const inputSrc = read(join('src', 'core', 'Input.js'));
+if (!/static lock\s*\(/.test(inputSrc)) fail('Input.lock() is gone — the single pointer-lock path must exist');
+if (!/setTimeout/.test(inputSrc) || !/catch/.test(inputSrc)) fail("Input.lock() lost its rejection fallback / relock retry — the mouse will escape again");
+if (!/!this\.locked && !this\.synthetic/.test(inputSrc)) fail('Input.js lost the "!this.locked && !this.synthetic" gates — mousemove/mousedown must be inert while unlocked (otherwise the OS cursor drives the camera and stops at the screen edge)');
+const hudSrc = read(join('src', 'ui', 'HUD.js'));
+if (!/\.lock\(\s*g\.canvas\s*\)|Input\.lock\(/.test(hudSrc)) fail('HUD.js no longer routes start/resume clicks through Input.lock — the start screen will play without pointer lock (mouse stops at the screen edge)');
+const gameSrc = read(join('src', 'core', 'Game.js'));
+for (const f of srcFiles) {
+  const s = read(f);
+  for (const m of s.matchAll(/^.*\.synthetic\s*=\s*true.*$/gm)) {
+    if (!/auto/.test(m[0])) fail(`${f}: "${m[0].trim()}" — input.synthetic may only be enabled under the ?auto=1 guard; anywhere else it lets the game read the OS cursor without pointer lock (mouse stops at the screen edge)`);
+  }
+}
+
+// ---------------------------------------------------------------- (a2) THE BAKE WORKER IS A REAL MODULE
+// The terrain bake worker used to be built by stringifying Terrain.js's own functions into a Blob. That
+// compiles fine in dev and dies in EVERY minified build (`ReferenceError: noise2 is not defined`), where the
+// only symptom is a silent fall back to a single-threaded bake on the main thread — the world still loads,
+// just frozen for seconds (measured: 22 rendered frames in 17.6 s of boot, vs 507 with the workers).
+// So: the bake math lives in src/world/terrainKernel.js and terrainWorker.js imports it; the bundler resolves
+// the names. Nothing here may go back to string-building a worker, and the kernel must stay three-free
+// (importing three would drag the whole engine into the worker chunk).
+{
+  const terr = read(join('src', 'world', 'Terrain.js'));
+  const kern = read(join('src', 'world', 'terrainKernel.js'));
+  const wrk = read(join('src', 'world', 'terrainWorker.js'));
+  if (/URL\.createObjectURL\s*\(\s*new Blob/.test(terr) || /\bnew Worker\(\s*url\b/.test(terr))
+    fail('src/world/Terrain.js is string-building its bake worker again — use `new Worker(new URL(\'./terrainWorker.js\', import.meta.url), { type: \'module\' })`; a stringified worker throws ReferenceError in every minified build and silently bakes on the main thread');
+  if (!/new Worker\(\s*new URL\(\s*'\.\/terrainWorker\.js'\s*,\s*import\.meta\.url\s*\)\s*,\s*\{\s*type:\s*'module'\s*\}\s*\)/.test(terr))
+    fail("src/world/Terrain.js: the bake worker must be created as `new Worker(new URL('./terrainWorker.js', import.meta.url), { type: 'module' })` so Vite bundles it");
+  if (/from '.*\bthree\b/.test(kern)) fail('src/world/terrainKernel.js imports three — the bake worker chunk must stay engine-free');
+  if (!/import \{ bakeKernel \} from '\.\/terrainKernel\.js'/.test(wrk)) fail('src/world/terrainWorker.js no longer imports bakeKernel from the kernel module');
+  if (!/import \{[^}]*\bheightAt\b[^}]*\} from '\.\/terrainKernel\.js'/.test(terr) || !/Terrain\.prototype\.heightAt = heightAt;/.test(terr))
+    fail('src/world/Terrain.js must import heightAt from terrainKernel.js and hang it on the prototype — one height field for the game AND the bake, or the mesh stops matching the colliders');
+  // the nine outer-biome kernels still have to be closure-free-ish: everything they call must exist in the kernel module
+  const bh = kern.match(/const BH = \[([\s\S]*?)\n\];/);
+  if (!bh) fail('src/world/terrainKernel.js: the BH[] outer-biome kernels are gone or reshaped — heightAt indexes that array by wedge k');
+  else {
+    const defined = ['ss', 'mix', 'n2', 'fbm2', 'fbm3', 'fbm4', 'ridged3', 'ridged4', 'rmf', 'rg', 'Math', 'Number'];
+    const kw = ['function', 'if', 'for', 'while', 'return', 'switch', 'catch'];
+    const body = bh[1].replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '');   // comments are prose, not calls
+    const called = [...new Set([...body.matchAll(/(?<![.\w$])([A-Za-z_$][\w$]*)\s*\(/g)].map((m) => m[1]))];
+    const bad = called.filter((id) => !defined.includes(id) && !kw.includes(id) && !id.startsWith('bh'));
+    if (bad.length) fail(`src/world/terrainKernel.js BH[] calls ${bad.join(', ')} — add it to the kernel module (and to this invariant's \`defined\` list) or the outer biomes bake flat`);
+    for (const id of defined.slice(0, 10)) if (!new RegExp(`(?:const|,)\\s*${id}\\s*=`).test(kern)) fail(`src/world/terrainKernel.js no longer defines \`${id}\`, which BH[]/heightAt call`);
+  }
+}
+
+// ---------------------------------------------------------------- (b) GROUND COVER NEVER GLOWS
+// The flashing white/blue blob bug (shipped 5x, 5 different causes). Grass.js must keep BOTH the
+// emissive ceiling AND the final outgoing-luminance cap (the cap closes every term at once:
+// emissive, specular, gust silvering, translucency, exposure stacking).
+const grass = read(join('src', 'world', 'Grass.js'));
+if (!grass) fail('src/world/Grass.js missing');
+else {
+  const ceil = grass.match(/vGrassEmissive\s*=\s*min\s*\(\s*vGrassEmissive\s*,\s*vec3\(\s*([0-9.]+)\s*\)\s*\)/);
+  if (!ceil) fail('Grass.js lost its ABSOLUTE emissive ceiling (min(vGrassEmissive, vec3(<=0.25))) — sub-pixel blades will flicker into bloom blobs again');
+  else if (parseFloat(ceil[1]) > 0.25) fail(`grass emissive ceiling raised to ${ceil[1]} (max 0.25) — thresholds are orchestrator-owned`);
+  const rough = grass.match(/roughnessFactor\s*=\s*mix\(\s*([0-9.]+)\s*,\s*([0-9.]+)/);
+  if (!rough) fail('Grass.js lost its roughnessFactor mix(a, b, ...) override — the stock 0.6 material value stops applying per-blade and the next tweak brings back specular glints');
+  else if (Math.min(parseFloat(rough[1]), parseFloat(rough[2])) < 0.6) fail(`grass tip roughness ${rough[2]} < 0.6 — low-roughness blades throw drifting specular glints (the original blob bug)`);
+  const cap = grass.match(/outgoingLight\s*\*=\s*([0-9.]+)\s*\/\s*max\(\s*grassLum\s*,\s*\1\s*\)/);
+  if (!cap) fail('Grass.js lost GRASS_LUM_CAP (outgoingLight *= 0.60 / max(grassLum, 0.60)) — the final-luminance cap is the one guard that closes EVERY blob path at once; do not remove it');
+  else if (parseFloat(cap[1]) > 0.65) fail(`GRASS_LUM_CAP raised to ${cap[1]} (max 0.65) — near the bloom threshold blades flicker into white balls again`);
+  if (!grass.includes('#include <opaque_fragment>\'') && !/GRASS_LUM_CAP \+ '#include <opaque_fragment>'/.test(grass)) fail('Grass.js no longer injects GRASS_LUM_CAP before <opaque_fragment> — the cap exists but is not applied');
+  if (!/metalness:\s*0[,\s}]/.test(grass)) fail('grass material metalness must stay 0 — metallic blades throw sun glints');
+  if (/envMapIntensity/.test(grass)) fail('grass material must not set envMapIntensity — glossy IBL on blades is another specular-glint path');
+}
+
+// ---------------------------------------------------------------- (c) VFX intensity ceilings
+// "Saturate the COLOUR, cap the INTENSITY." Agents keep brightening vfx to win daytime readability;
+// on small/ambient elements that is the blob bug. Ceilings anchor at the current hottest values.
+const vfx = read(join('src', 'vfx', 'VFX.js'));
+if (vfx) {
+  // wisp ambient trail: emitted 24/7 at grass height across the meadow — the strictest cap in the file
+  const trail = vfx.match(/\n  trail\([\s\S]*?\n  \},/);
+  if (!trail) fail("VFX.js 'trail' preset not found — if renamed, move its invariant too (wisp ambient trail must stay hue-saturated and capped)");
+  else {
+    if (/0xffffff/.test(trail[0])) fail("VFX 'trail' preset uses white (0xffffff) — wisps drag this across the meadow all day; white clips to white balls. Saturate: use the element color");
+    for (const m of trail[0].matchAll(/\.hdr\(\s*([0-9.]+)(?:\s*,\s*([0-9.]+))?/g)) {
+      if (parseFloat(m[1]) > 1.2) fail(`VFX 'trail' preset hdr ${m[1]} > 1.2 — the wisp ambient trail must stay at/below the wisp glow ceiling (1.1); brighter = drifting flashing blobs over the grass`);
+    }
+  }
+  // global ceiling: nothing hotter than the muzzle flash core (34x at noon), the current repo max
+  for (const m of vfx.matchAll(/\.hdr\(\s*([0-9.]+)(?:\s*\+\s*([0-9.]+)\s*\*\s*day)?/g)) {
+    const total = parseFloat(m[1]) + (m[2] ? parseFloat(m[2]) : 0);
+    if (total > 34) fail(`VFX.js hdr(${m[0].slice(5)}...) totals ${total} (> 34, the muzzle-core max) — anything hotter white-clips through ACES into a blob`);
+  }
+  const flash = vfx.match(/\*\s*([0-9.]+)\s*\*\s*\(0\.5\s*\+\s*0\.5\s*\*\s*this\.day\)/);
+  if (!flash) fail('VFX.flash() lost its night-halving "(0.5 + 0.5 * this.day)" — full-power point flashes at night blow the lit grass field into a white orb (shipped before)');
+  else if (parseFloat(flash[1]) > 9) fail(`VFX.flash() multiplier ${flash[1]} > 9 — flash PointLights light the actual meadow geometry past the bloom threshold`);
+}
+
+// ---------------------------------------------------------------- (d) enemy glow ceilings (user decree)
+const defs = read(join('src', 'enemies', 'defs.js'));
+if (defs) {
+  const wisp = defs.match(/wisp:\s*\{[\s\S]*?glow:\s*([0-9.]+)/);
+  if (wisp && parseFloat(wisp[1]) > 1.1) fail(`wisp glow ${wisp[1]} > 1.1 — user decree: wisps must not read as white blobs across the meadow (keep hue, cap intensity)`);
+}
+const enemies = read(join('src', 'enemies', 'Enemies.js'));
+if (enemies) {
+  const dg = enemies.match(/dayGlow\s*=\s*1\s*\+\s*([0-9.]+)\s*\*/);
+  if (dg && parseFloat(dg[1]) > 2.4) fail(`Enemies.dayGlow coefficient ${dg[1]} > 2.4 — it multiplies EVERY enemy emissive; higher pushes wisps/crystals past white-clip at noon`);
+}
+
+// ---------------------------------------------------------------- (e) postfx / lighting calibration pins
+// The bloom thresholds and sun intensity are jointly calibrated so sunlit white ~= 1.0 linear sits
+// UNDER the day bloom threshold (1.05). Moving any of them independently reintroduces field-wide blobs.
+const postfx = read(join('src', 'render', 'PostFX.js'));
+if (postfx) {
+  const th = postfx.match(/bloomNightTh\s*=\s*([0-9.]+)\s*;\s*this\.bloomDayTh\s*=\s*([0-9.]+)/);
+  if (!th) fail('PostFX bloomNightTh/bloomDayTh assignments not found — the threshold pins must stay greppable');
+  else {
+    if (parseFloat(th[2]) < 1.0) fail(`bloomDayTh ${th[2]} < 1.0 — sunlit-white (~1.0) crosses the day bloom threshold and the whole meadow blooms into white balls`);
+    if (parseFloat(th[1]) < 0.25) fail(`bloomNightTh ${th[1]} < 0.25 — moonlit grass crosses the night threshold`);
+  }
+  const ae = postfx.match(/AutoExposureEffect\(\{[^}]*max:\s*([0-9.]+)/);
+  if (ae && parseFloat(ae[1]) > 1.3) fail(`AutoExposure max ${ae[1]} > 1.3 — exposure gain multiplies the scene toward the bloom threshold`);
+  if (!/frameBufferType:\s*THREE\.HalfFloatType/.test(postfx)) fail('EffectComposer lost frameBufferType: THREE.HalfFloatType — LDR buffers clamp at 1.0 and the 1.05 day threshold silently never fires (bloom picks arbitrary pixels instead)');
+}
+const lighting = read(join('src', 'render', 'Lighting.js'));
+if (lighting) {
+  const sp = lighting.match(/sunPeak\s*=\s*([0-9.]+)/);
+  if (sp && parseFloat(sp[1]) > 3.2) fail(`Lighting sunPeak ${sp[1]} > 3.2 — calibrated so sunlit white ~= 1.0 pre-tonemap, 0.05 under the day bloom threshold; raising it blooms every bright surface`);
+}
+
+// ---------------------------------------------------------------- (f) viewmodel — always in frame, over the grass
+const wmodels = read(join('src', 'player', 'weapons', 'models.js'));
+if (wmodels) {
+  const white = wmodels.match(/white:\s*std\(\{[^}]*emissiveIntensity:\s*([0-9.]+)/);
+  if (white && parseFloat(white[1]) > 1.0) fail(`weapon sight 'white' emissiveIntensity ${white[1]} > 1.0 — the sights sit in EVERY frame over the grass; above the day bloom threshold they are permanent white balls`);
+  for (const name of ['gold', 'brass']) {
+    const m = wmodels.match(new RegExp(name + ':\\s*std\\(\\{[^}]*roughness:\\s*([0-9.]+)'));
+    if (m && parseFloat(m[1]) < 0.3) fail(`weapon '${name}' roughness ${m[1]} < 0.3 — glossy metal viewmodel parts throw white sun glints over the meadow (blobcheck-gated)`);
+  }
+}
+
+// ---------------------------------------------------------------- (g) props in the spawn meadow
+const props = read(join('src', 'world', 'Props.js'));
+if (props) {
+  const fm = props.match(/color:\s*0xffd090,\s*emissive:\s*0xff9a40,\s*emissiveIntensity:\s*([0-9.]+)/);
+  if (fm && parseFloat(fm[1]) > 1.6) fail(`lantern flame emissiveIntensity ${fm[1]} > 1.6 — 0.1 m flickering octahedra 6-17 m from spawn; hotter = sub-pixel warm blobs (shipped before at 4.0)`);
+}
+
+// ---------------------------------------------------------------- (h) HOT CORES KEEP THEIR HUE
+// Same decree as the grass cap, one level up: any small additive/emissive element that tone-maps to white
+// stops reading as magic and starts reading as a blob. Two structural guards, both added after the gate
+// caught live examples (a wisp reading as a white orb, and every impact preset starting from pure white).
+{
+  const mat = read(join('src', 'enemies', 'materials.js'));
+  if (!/aetherCap/.test(mat) || !/gl_FragColor\.rgb \*= aetherCap \/ aetherLum/.test(mat)) {
+    fail('src/enemies/materials.js lost the hue-preserving aether luminance cap (aetherCap) — creature crystals/eyes/cores blow out to white balls again');
+  } else {
+    const m = mat.match(/mix\(\s*6\.0\s*,\s*([0-9.]+)\s*,\s*vGlow\s*\)/);
+    if (!m || Number(m[1]) > 0.75) fail(`src/enemies/materials.js: the aether cap for full-glow parts is ${m ? m[1] : '?'} — must stay <= 0.75 linear or it clears the bloom threshold`);
+  }
+  const brush = read(join('src', 'vfx', 'Brush.js'));
+  const t = brush.match(/const HOT_TINT = ([0-9.]+)/);
+  if (!t) fail('src/vfx/Brush.js lost HOT_TINT — every impact/burst preset starts from pure white again, and an additive white core at hdr 4-7 is a white ball');
+  else if (Number(t[1]) < 0.4) fail(`src/vfx/Brush.js HOT_TINT is ${t[1]} — below 0.4 the hot core is white again; saturate the COLOUR, cap the INTENSITY`);
+  const terr2 = read(join('src', 'world', 'Terrain.js'));
+  if (!/FRAG_SHOULDER/.test(terr2)) fail('src/world/Terrain.js lost FRAG_SHOULDER — the ground goes flat white where a low sun rakes across it');
+}
+
+// ------------------------------------------------- (i) SHADER WARMUP MUST COMPILE IN THE COMPOSER'S SPACE
+// `outputColorSpace` is the SECOND field of three's program cache key, and getParameters reads it as
+// `currentRenderTarget === null ? renderer.outputColorSpace : workingColorSpace`. This game draws every pixel
+// through composer.render(), i.e. INTO a target, so its programs are keyed `srgb-linear`. A bare
+// renderer.compile() with nothing bound links the `srgb` twin — a real program the renderer never looks up —
+// and the one it needs still links on first draw, inside the GPU process, where neither cpuMs nor gpuMs sees
+// it. This shipped unnoticed for the project's whole history: warming that way left the program count 41
+// HIGHER than not warming at all. Binding a target took programs linked during one combat session 44 -> 1.
+// Route every warmup through compileForComposer/renderForComposer in src/render/Renderer.js.
+{
+  const rend = read(join('src', 'render', 'Renderer.js'));
+  if (!/export function compileForComposer/.test(rend) || !/setRenderTarget\(_warmRT\)/.test(rend)) {
+    fail('src/render/Renderer.js lost compileForComposer (or its bound scratch target) — shader warmup silently compiles the wrong colorspace and every program relinks during play');
+  }
+  for (const f of [['src', 'main.js'], ['src', 'player', 'Weapons.js'], ['src', 'player', 'Abilities.js'], ['src', 'world', 'EZTrees.js'], ['src', 'world', 'Terrain.js']]) {
+    // Strip line comments before testing: these files DOCUMENT this bug at length, so a naive substring
+    // test flags the prose explaining it. (It did, the moment the explanation was written.)
+    const src = read(join(...f)).replace(/\/\/[^\r\n]*/g, '');
+    if (src.includes('renderer.compile(') || src.includes('.renderer.compile(') || src.includes('compileAsync(')) {
+      fail(f.join('/') + " calls renderer.compile() directly - use compileForComposer(), or it builds the srgb twin the renderer never uses and the real program links mid-play (see src/render/Renderer.js)");
+    }
+  }
+}
+
+// ------------------------------------------------- (j) QUESTS ARE WRITTEN, NEVER SPOKEN
+// User decision 2026-08-23: the voiced opening quest was removed and every quest from here on is READ.
+// The failure mode this pins: a later builder "improves" a quest beat by reaching for audio.playVoice()
+// again, and the game silently reacquires a voice cast, a pinned-voice consistency contract and a
+// per-line asset budget that nobody signed up for. Narration belongs in the quest text and the quest
+// log. If story-mode voiced NPCs are ever green-lit, lift this rule deliberately — do not route
+// around it, and do not re-add /assets/voice/* to the preloader to make a single line work.
+for (const f of srcFiles) {
+  if (!f.includes(join('src', 'rpg'))) continue;
+  const src = read(f);
+  if (/playVoice\s*\(/.test(src)) fail(f + ' calls playVoice() - quests are WRITTEN, never spoken (user decision 2026-08-23). Put the words in the quest text and the quest log.');
+  if (/assets\/voice\//.test(src)) fail(f + ' references /assets/voice/ - the voice lines were deleted with the voiced opener; quests are written now.');
+}
+{
+  const assets = read(join('src', 'core', 'Assets.js'));
+  if (/voice-vale|assets\/voice\//.test(assets)) fail('src/core/Assets.js still preloads voice lines - they were deleted with the voiced opening quest (quests are written now).');
+}
+
+// ------------------------------------------------- (k) QUEST/AMMO DROPS MUST NOT FIGHT THE LOOT CAP
+// The opening quest's reward kept being evicted by loot.js's MAX_DROPS cap, and the workaround shipped
+// was a 5-second poll that re-dropped a legendary on the ground forever. Quest items and ammo bricks are
+// not loot: a fight that drops twelve commons must never delete the thing a quest told you to pick up,
+// and a quest item must never push someone's exotic off the floor either. Whoever owns loot.js keeps
+// these populations separate - if this rule blocks legitimate work, say so in your report.
+{
+  const ammo = read(join('src', 'rpg', 'ammo.js'));
+  if (ammo && !/MAX_BRICKS|BRICK_CAP/.test(ammo)) fail('src/rpg/ammo.js has no separate brick cap - bricks must not share loot.js MAX_DROPS, or a firefight evicts the loot you came for');
+}
+
+// ------------------------------------------------------------------ (l) NO TRADEMARKED ITEM NAMES
+// The weapon-name grammar is combinatorial and keyed by archetype, so one evocative word in a pool can
+// reproduce a real shipped item from the very games this project is benchmarked against — and land it on
+// the same weapon class as the original, which makes it look deliberate rather than accidental. Two were
+// already live: "Last Word" (Destiny exotic hand cannon; our `lastbreath` tag rolled onto hand cannons)
+// and "Thorn" (likewise). This greps the generator's pools, not free prose, so flavour text is unaffected.
+{
+  // Strip comments first. The whole point of this rule is that removals get EXPLAINED in place, and an
+  // explanation naming the word it removed would otherwise trip the rule that removal satisfied — which
+  // is how a guardrail teaches people to write vaguer comments.
+  const names = read(join('src', 'rpg', 'names.js'))
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .split(/\r?\n/).map((l) => l.replace(/\/\/.*$/, '')).join('\n');
+  // Proper nouns, not ordinary words: "Reckoning" alone is fine English; the faction name is not.
+  const banned = ['Last Word', 'Gjallarhorn', 'Ace of Spades', 'Fatebringer', 'Whisper of the Worm',
+                  'Hawkmoon', 'Sunshot', 'Riskrunner', 'the Nine', 'Xur', 'the Traveler',
+                  'Frostmourne', 'Thunderfury', 'Ashbringer', 'Shadowmourne', 'Atiesh'];
+  for (const b of banned) {
+    if (new RegExp("'" + b + "'").test(names)) {
+      fail(`src/rpg/names.js has "${b}" in a generator pool - that is a real shipped item from Destiny or WoW, and this project is benchmarked against both. Pick an original word.`);
+    }
+  }
+}
+
+// ------------------------------------------------------------------ (m) LOOT DROPS ARE AIRBORNE EMISSIVES
+// HANDOVER 9 says the coverage for glowing things OFF the ground is "the invariants.mjs ceilings + the
+// aether cap + HOT_TINT". That was not true of src/rpg/dropmesh.js, which had NO rule here at all while
+// carrying per-rarity emissive intensities up to 1.05 on an object that hovers at chest height and is
+// deliberately built to catch the eye. blobcheck.py cannot help: its BRIGHT test is scoped to ground
+// cover, so a drop beacon is invisible to it by construction. That is exactly the gap a future "make
+// exotics pop more" tweak walks through.
+// The ceiling is the same one the wisps use (1.1) — below the ~1.2 bloom threshold with margin.
+{
+  const dm = read(join('src', 'rpg', 'dropmesh.js'));
+  const m = dm.match(/const EMIS = \{([^}]*)\}/);
+  if (!m) fail('src/rpg/dropmesh.js lost its per-rarity EMIS table - the drop emissive ceiling is unpinned');
+  else {
+    for (const pair of m[1].split(',')) {
+      const kv = pair.split(':');
+      if (kv.length !== 2) continue;
+      const k = kv[0].trim(), v = Number(kv[1]);
+      if (Number.isFinite(v) && v > 1.1) fail(`src/rpg/dropmesh.js EMIS.${k} is ${v} - above the 1.1 ceiling. A drop hovers at chest height where blobcheck's ground-cover scoping cannot see it; saturate the COLOUR, cap the INTENSITY.`);
+    }
+  }
+}
+
+// ------------------------------------------------------------------ (n) NO GLB EVER REACHES THE RUNTIME
+// User directive 2026-08-26: assets come in through concept -> Tripo GLB -> the img2threejs skill ->
+// PROCEDURAL Three.js code, and the GLB is a structural reference that never ships. The project already
+// paid for the lesson once: guy.glb was a single rigid mesh with skinCount 0, so while it was on screen
+// the intro's IK arms, breathing idle and suck-in reach were all dead code (HANDOVER 6).
+// Provenance COMMENTS naming a .glb are wanted — every converted body should say what it was built from —
+// so this rule only looks at code, and only for the two things that actually load one.
+{
+  const stripped = (src) => {
+    let out = '', block = false;
+    for (const raw of src.split('\n')) {
+      let line = raw;
+      if (block) { const e = line.indexOf('*/'); if (e < 0) continue; line = line.slice(e + 2); block = false; }
+      for (;;) {                                  // a line can open a block comment after real code
+        const s = line.indexOf('/*');
+        if (s < 0) break;
+        const e = line.indexOf('*/', s + 2);
+        if (e < 0) { line = line.slice(0, s); block = true; break; }
+        line = line.slice(0, s) + line.slice(e + 2);
+      }
+      const c = line.indexOf('//');
+      out += (c >= 0 ? line.slice(0, c) : line) + '\n';
+    }
+    return out;
+  };
+  const walk = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((d) =>
+    d.isDirectory() ? walk(join(dir, d.name)) : (d.name.endsWith('.js') ? [join(dir, d.name)] : []));
+  // AMENDED 2026-08-26 (user call): RIGGED CREATURE GLBs ARE ALLOWED, everything else is still banned.
+  // Why the rule changed: the original ban was written after guy.glb shipped with skinCount 0 — one rigid
+  // mesh, so the intro's IK arms and breathing idle were dead code. That is an ANIMATION failure, not a
+  // performance one, and it does not apply to a properly rigged asset. Measured this session: Tripo's
+  // rig (v2.5-20260210 — the DEFAULT v1.0 fails with error 1004) returns the hound as a 101-joint
+  // quadruped Armature with full detail and zero warnings, and once a vertex buffer is on the GPU it
+  // costs exactly what procedurally-generated geometry costs. Procedural stays the rule for
+  // ARCHITECTURE, where parametric mouldings and exact repetition genuinely win.
+  // The narrow allowance: creature assets under /assets/creatures/, loaded through game.assets like
+  // everything else. Anything else naming a .glb in code is still the bug this rule was written for.
+  const CREATURE_GLB = /assets\/creatures\/[\w-]+\.glb/;
+  for (const f of walk('src')) {
+    const code = stripped(read(f));
+    const isAssets = f.replace(/\\/g, '/').endsWith('src/core/Assets.js');
+    const isEnemies = f.replace(/\\/g, '/').includes('src/enemies/');
+    if (/GLTFLoader|GLTF_?Loader/.test(code) && !isAssets) fail(`${f} imports/uses GLTFLoader - only src/core/Assets.js may load models, and only rigged creature GLBs under /assets/creatures/ (docs/CREATURE-PIPELINE.md).`);
+    for (const m of code.matchAll(/['"`]([^'"`]*\.glb)\b/g)) {
+      const url = m[1];
+      if (CREATURE_GLB.test(url) && (isAssets || isEnemies)) continue;   // the allowance
+      fail(`${f} names "${url}" in CODE (comments are fine). Only rigged creature GLBs under /assets/creatures/, referenced from Assets.js or src/enemies/, may exist at runtime - architecture stays procedural (docs/CREATURE-PIPELINE.md).`);
+    }
+  }
+}
+
+// ---------------------------------------------------------------- (o) combat-VFX min-channel discipline
+// The wave-5 regression: fighting a region's own bestiary blew the screen to near-white in 8 of 10
+// regions while the gate passed. The mechanical rule that closed it: a hue survives ACES iff its
+// SMALLEST channel stays under clip — so every author of small bright combat elements now carries a
+// min-channel cap, and the two screen-filling paths carry a near-camera coverage fade. These greps pin
+// the guards, not the tuning; tools/combatcheck.py (gate 1b) is the behavioural check.
+{
+  const brush = read(join('src', 'vfx', 'Brush.js'));
+  if (brush) {
+    const cap = brush.match(/BRUSH_MINCH_CAP\s*=\s*([0-9.]+)/);
+    if (!cap) fail('Brush.js lost BRUSH_MINCH_CAP — the structural min-channel cap every pool particle passes through; without it white cores at hdr>=3 clip to cream through ACES (wave-5 combat wash)');
+    else if (parseFloat(cap[1]) > 1.0) fail(`BRUSH_MINCH_CAP ${cap[1]} > 1.0 — above clip the cap no longer prevents whites from blooming`);
+  }
+  const parts = read(join('src', 'vfx', 'Particles.js'));
+  if (parts && !/smoothstep\(\s*1\.2\s*,\s*2\.4\s*,\s*size\s*\/\s*max\(\s*depth/.test(parts))
+    fail('Particles.js lost the near-camera coverage fade (env *= 1.0 - smoothstep(1.2, 2.4, size/max(depth,...))) — an enemy bolt detonating at the lens fills the frame with additive quads again (infernal "near-solid white in 0.5 s")');
+  const combat = read(join('src', 'combat', 'Combat.js'));
+  if (combat) {
+    if (/coreColor[\s\S]{0,120}?\.lerp\(\s*WHITE/.test(combat))
+      fail('Combat.js bolt coreColor lerps toward WHITE again — that plus the HDR multiplier is the exact cream bolt/pillar the wave-5 vale/shadowfen critics sampled (rgb ~225,238,233); keep the min-channel discipline instead');
+    if (!/min\(p\.coreColor\.r,\s*p\.coreColor\.g,\s*p\.coreColor\.b\)/.test(combat))
+      fail('Combat.js bolt coreColor lost its min-channel cap — the dominant channel may run hot, the smallest must stay under clip');
+    if (!/vFade\s*=\s*1\.0\s*-\s*smoothstep\(\s*1\.2\s*,\s*2\.4\s*,\s*aSize/.test(combat))
+      fail('Combat.js HALO_VERT lost its near-camera coverage fade (vFade) — stacked volley halos at the lens were the celestial 41k-px pale disc');
+  }
+  const mats = read(join('src', 'enemies', 'materials.js'));
+  if (mats && !/uGLB\s*>\s*0\.5/.test(mats))
+    fail('materials.js lost the uGLB body ceiling — rigged GLBs ship aGlow 0 on every vertex, so without it all 13 GLB creatures bypass BOTH aether caps (luminance 6.0 / channel 8.0 = inert)');
+  const lit = read(join('src', 'render', 'Lighting.js'));
+  if (lit && !/AETHER_SKIN/.test(lit))
+    fail('Lighting.js lost the AETHER_SKIN opt-out on METAL_ENV — the 2.5-3x env-specular gold boost lands on skinned creatures with ORM metalness 1 again (wave-5 "stickers" + wash amplifier)');
+  const pfx = read(join('src', 'render', 'PostFX.js'));
+  if (pfx && !/aeKnee/.test(pfx))
+    fail('PostFX.js lost the aeKnee highlight rolloff on auto-exposure — the AE boost (up to 1.3x) multiplies hot emissives before ACES in veil-darkened regions (void/infernal), re-arming the wash');
+}
+
+// ---------------------------------------------------------------- (p) PUBLIC-REPO HYGIENE
+// The repository is public. Three classes of thing must never enter it again, and .gitignore alone
+// does not stop them: `git add -f`, a new directory nobody thought to ignore, and a pasted key all
+// walk straight past it. This rule reads what git ACTUALLY TRACKS, so it sees what the ignore file
+// misses. It runs in CI on every push and PR and in the Stop hook after every agent turn.
+//   1. Recorded audio — the takes were generated by a service that licenses USE but forbids
+//      redistribution, so they were stripped from the tree AND from all 247 commits of history.
+//      Re-adding one puts the repo back in breach; the synthesis paths in audio/sfx.js and
+//      audio/music.js are the shipping paths here.
+//   2. Credentials — no key formats, and no `key = "literal"` assignments. Every API reference in
+//      this repo reads process.env at runtime, which is the only form that is safe to publish.
+//   3. Local machine paths — `C:\Users\<name>\...` names a person's account on a public page, and
+//      it is dead information to everyone who clones.
+// Plus: LICENSE and NOTICE must exist, because MIT over a tree of third-party-generated assets is a
+// promise nobody can keep without the NOTICE next to it saying what the grant does not cover.
+{
+  const { execSync } = await import('node:child_process');
+  let tracked = [];
+  try { tracked = execSync('git ls-files', { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).split('\n').filter(Boolean); }
+  catch { /* not a git checkout (a tarball, a CI export) — the other rules still apply */ }
+
+  if (tracked.length) {
+    const audio = tracked.filter((f) => /\.(mp3|wav|ogg|m4a|flac)$/i.test(f));
+    if (audio.length) fail(`recorded audio is tracked again (${audio.slice(0, 3).join(', ')}${audio.length > 3 ? `, +${audio.length - 3} more` : ''}) — the licence covers using those takes, not redistributing them. Keep them in public/assets/{sfx,music}/ locally with public/assets/audio.json; both are gitignored and Assets.js loads them when present (see NOTICE)`);
+
+    for (const f of ['LICENSE', 'NOTICE']) if (!tracked.includes(f)) fail(`${f} is missing — a public repo shipping generated assets needs both: LICENSE grants the code, NOTICE says the grant stops at the asset files`);
+
+    // Text files only: a JPEG's bytes will match anything you grep for.
+    const textish = tracked.filter((f) => /\.(js|mjs|cjs|ts|json|md|html|css|sh|py|yml|yaml|txt)$/i.test(f));
+    const KEYS = [
+      [/\bsk-[A-Za-z0-9_-]{16,}/, 'an OpenAI/Anthropic-style key'],
+      [/\bgh[pousr]_[A-Za-z0-9]{20,}/, 'a GitHub token'],
+      [/\bgithub_pat_[A-Za-z0-9_]{20,}/, 'a GitHub fine-grained PAT'],
+      [/\bAKIA[0-9A-Z]{16}\b/, 'an AWS access key id'],
+      [/\bAIza[0-9A-Za-z_-]{30,}/, 'a Google API key'],
+      [/\bxox[baprs]-[A-Za-z0-9-]{10,}/, 'a Slack token'],
+      [/-----BEGIN [A-Z ]*PRIVATE KEY-----/, 'a private key block'],
+      [/\b(?:api[_-]?key|secret|token|password)\s*[:=]\s*['"][^'"$\s]{12,}['"]/i, 'a hardcoded credential (read process.env instead)'],
+    ];
+    for (const f of textish) {
+      if (f === 'tools/invariants.mjs') continue;                      // this file names the patterns it hunts
+      const s = read(f);
+      if (!s) continue;
+      for (const [re, what] of KEYS) if (re.test(s)) fail(`${f} contains what looks like ${what} — this repository is public; nothing but process.env reads belong in it`);
+      // Both spellings: prose says C:\Users\name, a JS string literal says C:\\Users\\name,
+      // and a URL/doc says C:/Users/name. The first draft of this rule only caught the last one.
+      const home = s.match(/[A-Za-z]:[\\/]{1,2}Users[\\/]{1,2}([A-Za-z0-9._-]+)/);
+      if (home && home[1].toLowerCase() !== '<name>') fail(`${f} hardcodes a local machine path (${home[0]}) — use a placeholder like <repo> or ~/, it is a real account name on a public page and dead information to anyone who clones`);
+    }
+  }
+}
+
+console.log(failed ? '[invariants] ==== FAILED ====' : '[invariants] all OK');
+process.exit(failed ? 1 : 0);
