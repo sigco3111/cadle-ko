@@ -1,2 +1,2 @@
-# cadle-ko payload · 마지막 줄이 실제 URL
-https://docs.google.com/document/d/1VZFEjxVNJE69RXAX28JlFqiGXPPsJNRMPeoRQdXtl0M/export?format=txt
+# cadle-ko payload · 마지막 줄이 URL
+https://docs.google.com/document/d/1YnEdaxjwumac9fEUMnQVy3PGC0DBsT1KpfypWyak0ng/export?format=txt
