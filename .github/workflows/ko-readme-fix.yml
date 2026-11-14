@@ -1,0 +1,19 @@
+name: ko-readme-fix
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fix the dictionary count line
+        run: |
+          set -euo pipefail
+          sed -i 's/약 1,290개 항목/약 2,090개 항목/' README.md
+          grep -n "2,090" README.md
+          git config user.name sigco3111
+          git config user.email sigco3111@users.noreply.github.com
+          git commit -am "docs: 사전 항목 수 표기 수정(약 1,290 -> 약 2,090)"
+          git push
