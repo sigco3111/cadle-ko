@@ -134,7 +134,7 @@ node tools/wrapup/screenshots.mjs   # docs/screenshots/*.png
 - 빌드 후 `docs/`의 루트 절대 경로(`/assets/…`, `/play`)를 `/cadle-ko/` 기준으로 치환합니다(`tools/wrapup/publish.mjs`).
 - 게임 오른쪽 아래에 한국어판 표기 바와 크레딧 패널을 추가했습니다(`src/i18n/overlay.js`).
 - 개발용 자료(`progress/`, `progress.html`, `.claude/`)는 배포본에서 제외했고, 원작 `docs/`는 `upstream-docs/`로 옮겨 보존했습니다.
-- 원작 README는 [README.en.md](README.en.md)로 보존했습니다.
+- 영문 설명은 [README.en.md](README.en.md)에 함께 정리했습니다(원작 README는 이 저장소에 그대로 남아 있는 원본 문서를 따릅니다).
 
 ## 검증 기록
 
