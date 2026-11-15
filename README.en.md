@@ -134,7 +134,7 @@ The same credits are available in game through the **크레딧** button.
 - After building, root-absolute paths in `docs/` (`/assets/…`, `/play`) are rewritten for `/cadle-ko/` by `tools/wrapup/publish.mjs`.
 - A Korean credits bar and credit panel were added in `src/i18n/overlay.js`.
 - Development material (`progress/`, `progress.html`, `.claude/`) is excluded from the published build; the upstream `docs/` was moved to `upstream-docs/`.
-- The upstream README is preserved as [README.en.md](README.en.md) — this file.
+- This file is the English edition of the notes above; the upstream README is unchanged upstream.
 
 ## Verification
 
